@@ -91,54 +91,54 @@
 //    int ET;//expected execution time
 //  //	int time;//number of times  it  was  actually executed->has to reach ET, if preempted  and time != ET so we  shouldexecuted  till =ET
 //  };
-//  
+//
 //  struct table arr[3];
 //  struct table iddle;
-//  
+//
 //  bool first=true;//if equal true than the task no taskwere executed  before
 //  int currentTask;
-//  
-//  
+//
+//
 //  QueueHandle_t Q = 0;
-//  
+//
 //  void init(){
 //    arr[0].priority = 2;//has higher priority than arr[1]
 //    arr[0].ET = 4;//constant should not be modified anywhere
 //  //	arr[0].time = 0;//time always starts with 0
-//    
+//
 //    arr[1].priority = 4;
 //    arr[1].ET = 2;//constant should not be modifies anywhere
 //    //arr[1].time = 0;//time always starts with 0
-//    
-//    iddle.priority = 16;//the lowest priority--> cannot be changed 
+//
+//    iddle.priority = 16;//the lowest priority--> cannot be changed
 //    iddle.ET = 1;//can be repeated
 //    //iddle.time = 0;
 //  }
 //  void Preempt(void *task){
-//		
-//		
+//
+//
 //	}
 //  /*void Preempt(char New){
-//    
+//
 //    int tasknum;
 //    if(New=='1') tasknum = 1;
 //    else if(New=='2')	tasknum = 2;
 //    else tasknum = 0;
-//    
+//
 //    //if New has lower priority than the task being executed
 //    if(tasknum>currentTask || tasknum == 0){
 //      for(int i=0;i<arr[tasknum].ET;i++)
 //        xQueueSendToBack(Q,&New,10);
-//      
+//
 //    }
 //    else if(tasknum>= currentTask && tasknum != 0){
 //      // if the priority is higher or the same --> we preempt here
 //      for(int i=0;i<arr[tasknum].ET;i++)
 //        xQueueSendToFront(Q,&New,10);
 //    }
-//    
+//
 //  }*/
-//  
+//
 //  void task0(void *p){
 //    //this is the iddle task
 //    char c[29] = "Iddle task is being executed";
@@ -148,11 +148,11 @@
 //		}
 //    taskEXIT_CRITICAL();
 //    currentTask = 0;
-//    
+//
 //  }
-//  
+//
 //  void task1(void* p){
-//    
+//
 //    char c[23] = "task1 is being executed";
 //    taskENTER_CRITICAL();
 //		for (int i=0; i<23; i++){
@@ -160,11 +160,11 @@
 //		}
 //    taskEXIT_CRITICAL();
 //    currentTask = 1;
-//    
+//
 //  }
-//  
+//
 //  void task2(void* p){
-//    
+//
 //    char c[23] = "task2 is being executed";
 //    taskENTER_CRITICAL();
 //		for (int i=0; i<23; i++){
@@ -172,7 +172,7 @@
 //		}
 //    taskEXIT_CRITICAL();
 //    currentTask = 2;
-//    
+//
 //  }
 //int main(void)
 //{
@@ -228,7 +228,7 @@
 //  /* add queues, ... */
 //  /* USER CODE END RTOS_QUEUES */
 //  __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE);
-//	
+//
 //		//create the queue
 //	Q = xQueueCreate(20, sizeof(int));//size of queue is 20
 
@@ -238,12 +238,12 @@
 //	xTaskCreate(task1, (const char*)"t1", 4096, NULL, 1, NULL);
 //	xTaskCreate(task2, (const char*)"t2", 4096, NULL, 1, NULL);
 //	xTaskCreate(task0, (const char*)"iddle", 4096, NULL, 1, NULL);
-//	
+//
 
 
 //	init();//assign each task its initial values
-//	
-//	
+//
+//
 //	//scheduling
 //	/*
 //	user inputs a number from 0 to 2
@@ -267,8 +267,8 @@
 //		//not the first task being executed
 //		Preempt(USER_IN);
 //	}
-//	
-//	
+//
+//
 //	//read  from queue and call the tasks
 //	int c;
 //	for(;;)// I am not sure about the inifite loop here
@@ -278,7 +278,7 @@
 //			else if(c==2) task2(p);
 //			else task0(p);
 //		}
-//		
+//
 //	}
 
 //  /* Start scheduler */
@@ -613,16 +613,21 @@ void createTask(void *task, int priority, int exec_time, int stack_size)
       readyQ_rear = (readyQ_rear + 1) % READYQ_SIZE;
       ready_queue[readyQ_rear] = taskname;
 
-      printf("enqueued in ready queue \n");
+      	char c[23]="enqueued in ready queu1";
+			 HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
+
     }
     else if(isFull(readyQ_front, readyQ_rear)){
-      printf("Ready Queue is full !! \n");
+     char c[13]="queue is full";
+			 HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
     }
     else{
       if ((readyQ_front == 0) && (readyQ_rear == 0)){
-        if (taskname.priority<ready_queue[readyQ_rear].priority){
+        if (taskname.priority>ready_queue[readyQ_rear].priority){
           readyQ_rear = (readyQ_rear + 1) % READYQ_SIZE;
           ready_queue[readyQ_rear] = taskname;
+					char c2[23]="enqueued in ready queu2";
+			 HAL_UART_Transmit(&huart1,(uint8_t*)&c2,sizeof(c2),10);
         }
         else{
           ready_queue[(readyQ_rear + 1) % READYQ_SIZE] = ready_queue[readyQ_rear];
@@ -633,9 +638,11 @@ void createTask(void *task, int priority, int exec_time, int stack_size)
       else{
         int i = readyQ_rear;
         while (i != readyQ_front){
-          if (taskname.priority<ready_queue[i].priority){
+          if (taskname.priority>ready_queue[i].priority){
             readyQ_rear = (readyQ_rear + 1) % READYQ_SIZE;
             ready_queue[(i+1) % READYQ_SIZE] = taskname;
+						char c3[23]="enqueued in ready queu3";
+			 HAL_UART_Transmit(&huart1,(uint8_t*)&c3,sizeof(c3),10);
             break;
           }
           else{
@@ -647,39 +654,33 @@ void createTask(void *task, int priority, int exec_time, int stack_size)
       }
     }
 	}
-	
+
 	void idletask(){
 	  char c[4] = "idle";
-		for (int i=0; i<4; i++){
-    HAL_UART_Transmit(&huart1,(uint8_t*)&c,1,10);
-		}
+    HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
 	}
 
   void task1(){
     char c[23] = "task1 is being executed";
-		for (int i=0; i<23; i++){
-    HAL_UART_Transmit(&huart1,(uint8_t*)&c,1,10);
-		}
+    HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
   }
 
   void task2(){
     char c[23] = "task2 is being executed";
-		for (int i=0; i<23; i++){
-    HAL_UART_Transmit(&huart1,(uint8_t*)&c,1,10);
-		}
+    HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
   }
 
   void task3(){
     char c[23] = "task3 is being executed";
-    for (int i=0; i<23; i++){
-    HAL_UART_Transmit(&huart1,(uint8_t*)&c,1,10);
-    }
+    HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
   }
 
   void Dispatch(){
 		void * executetask;
     if(isEmpty(readyQ_front)) {
-      printf("Ready Queue is empty !! \n");
+     char c[14]= "Queue is Empty";
+			 HAL_UART_Transmit(&huart1,(uint8_t*)&c,sizeof(c),10);
+
       return;
     }
     else {
@@ -721,7 +722,6 @@ int main(void)
   MX_GPIO_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -749,6 +749,31 @@ int main(void)
   /* add queues, ... */
   /* USER CODE END RTOS_QUEUES */
   __HAL_UART_ENABLE_IT(&huart1,UART_IT_RXNE);
+		  int count = 1;
+	if (count == 1)
+  {
+    createTask(task1, 4, 3, 200);
+    createTask(task1, 4, 3, 200);
+    createTask(task1, 4, 3, 200);
+		count++;
+  }
+  else if (count == 2)
+  {
+    createTask(task2, 3, 3, 200);
+    createTask(task2, 3, 3, 200);
+    createTask(task2, 3, 3, 200);
+		count++;
+  }
+  else if (count == 3){
+    createTask(task3, 2, 3, 200);
+		count  =0;
+	}
+
+count++;
+	if (isEmpty(readyQ_front))
+		createTask(idletask, 15, 1, 0);
+
+	Dispatch();
 
   /* Start scheduler */
   osKernelStart();
@@ -759,29 +784,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-  int count = 1;
+
 
   /* USER CODE END WHILE */
-  if (count == 1)
-  {
-    createTask(task1, 4, 3, 200);
-    createTask(task1, 4, 3, 200);
-    createTask(task1, 4, 3, 200);
-  }
-  else if (count == 2)
-  {
-    createTask(task2, 3, 3, 200);
-    createTask(task2, 3, 3, 200);
-    createTask(task2, 3, 3, 200);
-  }
-  else if (count == 3)
-    createTask(task3, 2, 3, 200);
 
-count++;
-	if (isEmpty(readyQ_front))
-		createTask(idletask, 15, 1, 0);
-  
-	Dispatch();
   /* USER CODE BEGIN 3 */
 
   }
